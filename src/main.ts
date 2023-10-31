@@ -5,7 +5,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-    origin: ['http://localhost:3001'], // Разрешенные домены
+    origin: ['http://localhost:3001', 'https://music-front-alpha.vercel.app'], // Разрешенные домены
     methods: 'GET,PUT,POST,DELETE', // Разрешенные HTTP методы
     allowedHeaders: 'Content-Type, Authorization', // Разрешенные заголовки
   });
