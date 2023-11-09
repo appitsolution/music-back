@@ -4,6 +4,12 @@ import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
   timestamps: true,
 })
 export class Influencer {
+  @Prop({ default: 'influencer' })
+  role: string;
+
+  @Prop({ default: 0 })
+  balance: string;
+
   @Prop()
   firstName: string;
 

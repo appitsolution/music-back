@@ -3,12 +3,19 @@ import { UpdateInvoiceDetailsDto } from './dto/update-invoice-details';
 import { InjectModel } from '@nestjs/mongoose';
 import { InvoiceDetails } from './schemas/invoice-details.schema';
 import mongoose from 'mongoose';
+import { Influencer } from 'src/auth/schemas/influencer.schema';
+import { CreateInvoiceDtoDto } from './dto/create-invoice.dto';
+import { Invoices } from './schemas/invoices.schema';
 
 @Injectable()
 export class InvoiceService {
   constructor(
     @InjectModel(InvoiceDetails.name)
     private invoiceDetailsModel: mongoose.Model<InvoiceDetails>,
+    @InjectModel(Influencer.name)
+    private influencerModel: mongoose.Model<Influencer>,
+    @InjectModel(Invoices.name)
+    private invoicesModel: mongoose.Model<Invoices>,
   ) {}
 
   async updateInvoiceDetails(data: UpdateInvoiceDetailsDto) {
@@ -69,6 +76,53 @@ export class InvoiceService {
         code: 500,
         message: err,
       };
+    }
+  }
+
+  async createInvoice(data: CreateInvoiceDtoDto) {
+    try {
+      const checkUser = await this.influencerModel.findOne({
+        _id: data.influencerId,
+      });
+
+      if (!checkUser) {
+        return {
+          code: 404,
+          message: 'influencer not found',
+        };
+      }
+
+      const result = await this.invoicesModel.create({
+        ...data,
+        status: 'pending',
+      });
+      return {
+        code: 201,
+        result,
+      };
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  async getInvoices(influencerId: string) {
+    if (!influencerId) {
+      return {
+        status: 400,
+        message: 'Not enough arguments',
+      };
+    }
+
+    try {
+      const result = await this.invoicesModel.find({
+        influencerId: influencerId,
+      });
+      return {
+        code: 200,
+        invoices: result,
+      };
+    } catch (err) {
+      console.log();
     }
   }
 }

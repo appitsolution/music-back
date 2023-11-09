@@ -12,6 +12,7 @@ import { CreateClientDto } from './dto/create-client.dto';
 import { CreateInfluencerDto } from './dto/create-influencer.dto';
 import { LoginClientDto } from './dto/login-client.dto';
 import { VerifyDto } from './dto/verify.dto';
+import { ApiProperty } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
@@ -40,5 +41,10 @@ export class AuthController {
   @Post('verify')
   verify(@Body() data: VerifyDto) {
     return this.authService.verify(data);
+  }
+
+  @Get('influencers')
+  getInfluencers(){
+    return this.authService.getInfluencers()
   }
 }

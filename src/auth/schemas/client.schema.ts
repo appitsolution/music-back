@@ -4,6 +4,8 @@ import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
   timestamps: true,
 })
 export class Client {
+  @Prop({ default: 'client' })
+  role: string;
   @Prop()
   firstName: string;
 
