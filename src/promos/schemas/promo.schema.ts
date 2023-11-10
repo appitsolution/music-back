@@ -11,6 +11,47 @@ export class SelectPrice {
 
 const SelectPriceSchema = SchemaFactory.createForClass(SelectPrice);
 
+@Schema()
+export class SelectInfluencers {
+  @Prop()
+  influencerId: string;
+
+  @Prop()
+  confirmation: string;
+
+  @Prop({ default: '' })
+  brand: string;
+
+  @Prop({ default: '' })
+  datePost: string;
+
+  @Prop({ default: '' })
+  caption: string;
+
+  @Prop({ default: '' })
+  video: string;
+
+  @Prop({ default: '' })
+  postLink: string;
+
+  @Prop({ default: '' })
+  screenshot: string;
+
+  @Prop({ default: '' })
+  impressions: string;
+
+  @Prop({ default: '' })
+  reach: string;
+
+  @Prop({ default: '' })
+  like: string;
+
+  @Prop({ default: '' })
+  invoice: string;
+}
+
+const SelectInfluencersSchema = SchemaFactory.createForClass(SelectInfluencers);
+
 @Schema({
   timestamps: true,
 })
@@ -23,10 +64,12 @@ export class Promos {
     type: SelectPriceSchema,
   })
   selectPrice: SelectPrice;
+
   @Prop({
     required: true,
+    type: [SelectInfluencersSchema],
   })
-  selectInfluencers: number[];
+  selectInfluencers: SelectInfluencers[];
 
   @Prop()
   videoLink: string;
@@ -51,6 +94,9 @@ export class Promos {
 
   @Prop({ required: true, default: 'wait' })
   paymentStatus: string;
+
+  @Prop({ required: true })
+  statusPromo: string;
 }
 
 export const PromosSchema = SchemaFactory.createForClass(Promos);

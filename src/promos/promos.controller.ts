@@ -4,6 +4,7 @@ import {
   Post,
   Body,
   Patch,
+  Put,
   Param,
   Delete,
   Query,
@@ -24,7 +25,19 @@ export class PromosController {
   @ApiQuery({ name: 'id', required: true })
   @Get('history')
   historyPromos(@Query() args: { id: string }) {
-    return this.promosService.historyPromos(args.id);
+    return this.promosService.historyPromosClient(args.id);
+  }
+
+  @ApiQuery({ name: 'id', required: true })
+  @Get('ongoing-promos-client')
+  getOngoingPromosClient(@Query() args: { id: string }) {
+    return this.promosService.getOngoingPromosClient(args.id);
+  }
+
+  @ApiQuery({ name: 'id', required: true })
+  @Get('history-influencer')
+  historyPromosInfluencer(@Query() args: { id: string }) {
+    return this.promosService.historyPromosInfluencer(args.id);
   }
 
   @ApiQuery({ name: 'userId', required: true })
@@ -32,5 +45,74 @@ export class PromosController {
   @Get('history/one')
   historyPromosOne(@Query() args: { userId: string; promosId: string }) {
     return this.promosService.historyPromosOne(args.userId, args.promosId);
+  }
+
+  @ApiQuery({ name: 'id', required: true })
+  @ApiQuery({ name: 'userId', required: true })
+  @Get('ongoing/one')
+  getOngoingPromosClientCurrent(@Query() args: { id: string; userId: string }) {
+    return this.promosService.getOngoingPromosClientCurrent(
+      args.id,
+      args.userId,
+    );
+  }
+
+  @ApiQuery({ name: 'influencerId', required: true })
+  @Get('get-new-promos')
+  getNewPromos(@Query() args: { influencerId: string }) {
+    return this.promosService.getNewPromos(args.influencerId);
+  }
+
+  @ApiQuery({ name: 'influencerId', required: true })
+  @ApiQuery({ name: 'promoId', required: true })
+  @ApiQuery({ name: 'promoResponse', required: true })
+  @Put('update-response')
+  updateResponseNewPromo(
+    @Query()
+    args: {
+      influencerId: string;
+      promoId: string;
+      promoResponse: string;
+    },
+  ) {
+    return this.promosService.updateResponseNewPromo(
+      args.influencerId,
+      args.promoId,
+      args.promoResponse,
+    );
+  }
+
+  @ApiQuery({ name: 'influencerId', required: true })
+  @Get('get-ongoing-promos')
+  getOngoingPromos(@Query() args: { influencerId: string }) {
+    return this.promosService.getOngoingPromos(args.influencerId);
+  }
+
+  @ApiQuery({ name: 'influencerId', required: true })
+  @ApiQuery({ name: 'promoId', required: true })
+  @Get('get-ongoing-promo-one')
+  getOngoingPromoOne(@Query() args: { influencerId: string; promoId: string }) {
+    return this.promosService.getOngoingPromoOne(
+      args.influencerId,
+      args.promoId,
+    );
+  }
+  @ApiQuery({ name: 'influencerId', required: true })
+  @ApiQuery({ name: 'promoId', required: true })
+  @Put('update-ongoing')
+  updateOngoingPromo(
+    @Query()
+    args: {
+      influencerId: string;
+      promoId: string;
+      promoResponse: string;
+    },
+    @Body() body,
+  ) {
+    return this.promosService.updateOngoingPromo(
+      args.influencerId,
+      args.promoId,
+      body,
+    );
   }
 }

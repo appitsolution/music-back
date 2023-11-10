@@ -8,6 +8,9 @@ import { InvoiceModule } from './invoice/invoice.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Client } from './auth/schemas/client.schema';
 import { PromosModule } from './promos/promos.module';
+import { FileModule } from './file/file.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -20,6 +23,11 @@ import { PromosModule } from './promos/promos.module';
     InvoiceModule,
     Client,
     PromosModule,
+    FileModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads',
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],

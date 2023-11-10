@@ -70,8 +70,8 @@ export class Invoices {
   @Prop()
   amount: number;
 
-  @Prop()
-  file: string;
+  @Prop({ default: '' })
+  fileUrl: string;
 }
 
 export const InvoicesSchema = SchemaFactory.createForClass(Invoices);
