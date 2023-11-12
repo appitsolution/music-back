@@ -385,23 +385,44 @@ export class PromosService {
           message: 'not found',
         };
       }
-
-      const updateNewPromo = await this.promosModel.findOneAndUpdate(
-        {
-          _id: promoId,
-          selectInfluencers: { $elemMatch: { influencerId: influencerId } },
-        },
-        {
-          $set: {
-            'selectInfluencers.$.confirmation': promoResponse,
+      if(findNewPromo.statusPromo === "wait" && promoResponse === 'accept'){
+        const updateNewPromo = await this.promosModel.findOneAndUpdate(
+          {
+            _id: promoId,
+            selectInfluencers: { $elemMatch: { influencerId: influencerId } },
           },
-        },
-      );
-
-      return {
-        code: 200,
-        updateNewPromo,
-      };
+          {
+            $set: {
+              statusPromo: "work",
+              'selectInfluencers.$.confirmation': promoResponse,
+            },
+          },
+        );
+  
+        return {
+          code: 200,
+          updateNewPromo,
+        };
+      }else {
+        const updateNewPromo = await this.promosModel.findOneAndUpdate(
+          {
+            _id: promoId,
+            selectInfluencers: { $elemMatch: { influencerId: influencerId } },
+          },
+          {
+            $set: {
+              
+              'selectInfluencers.$.confirmation': promoResponse,
+            },
+          },
+        );
+  
+        return {
+          code: 200,
+          updateNewPromo,
+        };
+      }
+      
     } catch (err) {
       return {
         code: 500,
