@@ -8,6 +8,7 @@ import {
   Influencer,
   InfluencerSchema,
 } from 'src/auth/schemas/influencer.schema';
+import { Offers, OffersSchema } from './schemas/offers.schema';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import {
       { name: Promos.name, schema: PromosSchema },
       { name: Client.name, schema: ClientSchema },
       { name: Influencer.name, schema: InfluencerSchema },
+      { name: Offers.name, schema: OffersSchema },
     ]),
   ],
   controllers: [PromosController],

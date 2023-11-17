@@ -22,6 +22,11 @@ export class PromosController {
     return this.promosService.createPromos(data);
   }
 
+  @Get('offers')
+  getOffers( ) {
+    return this.promosService.getOffers();
+  }
+
   @ApiQuery({ name: 'id', required: true })
   @Get('history')
   historyPromos(@Query() args: { id: string }) {

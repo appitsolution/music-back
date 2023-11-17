@@ -5,6 +5,7 @@ import { Promos } from './schemas/promo.schema';
 import mongoose from 'mongoose';
 import { Client } from 'src/auth/schemas/client.schema';
 import { Influencer } from 'src/auth/schemas/influencer.schema';
+import { Offers } from './schemas/offers.schema';
 
 @Injectable()
 export class PromosService {
@@ -15,6 +16,8 @@ export class PromosService {
     private clientModel: mongoose.Model<Client>,
     @InjectModel(Influencer.name)
     private influencerModel: mongoose.Model<Influencer>,
+    @InjectModel(Offers.name)
+    private offersModel: mongoose.Model<Offers>,
   ) {}
 
   async createPromos(data: CreatePromosDto) {
@@ -43,6 +46,22 @@ export class PromosService {
         code: 500,
         message: err,
       };
+    }
+  }
+
+  async getOffers(){
+    try{
+      const offers = await this.offersModel.find({})
+
+      return {
+        code: 200,
+        offers: offers
+      }
+    }catch(err){
+      return {
+        code: 500,
+        message: err
+      }
     }
   }
 
