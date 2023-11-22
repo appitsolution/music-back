@@ -39,4 +39,12 @@ export class InvoiceController {
   getInvoices(@Query() args: { influencerId: string }) {
     return this.invoiceService.getInvoices(args.influencerId);
   }
+
+  @ApiQuery({ name: 'influencerId' })
+  @Get('saved')
+  getInvoiceSave(@Query() args: { influencerId: string }) {
+    return this.invoiceService.getInvoiceSave(args.influencerId);
+  }
+
+  
 }

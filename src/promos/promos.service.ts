@@ -6,6 +6,7 @@ import mongoose from 'mongoose';
 import { Client } from 'src/auth/schemas/client.schema';
 import { Influencer } from 'src/auth/schemas/influencer.schema';
 import { Offers } from './schemas/offers.schema';
+import sendMail from 'src/utils/sendMail';
 
 @Injectable()
 export class PromosService {
@@ -49,19 +50,19 @@ export class PromosService {
     }
   }
 
-  async getOffers(){
-    try{
-      const offers = await this.offersModel.find({})
+  async getOffers() {
+    try {
+      const offers = await this.offersModel.find({});
 
       return {
         code: 200,
-        offers: offers
-      }
-    }catch(err){
+        offers: offers,
+      };
+    } catch (err) {
       return {
         code: 500,
-        message: err
-      }
+        message: err,
+      };
     }
   }
 
@@ -209,6 +210,7 @@ export class PromosService {
           ...promo,
           selectInfluencers: addInfluencer,
           client: !clientName ? 'No Date' : clientName.firstName,
+          dateRequest: promo.dateRequest,
         },
       };
     } catch (err) {
@@ -404,7 +406,7 @@ export class PromosService {
           message: 'not found',
         };
       }
-      if(findNewPromo.statusPromo === "wait" && promoResponse === 'accept'){
+      if (findNewPromo.statusPromo === 'wait' && promoResponse === 'accept') {
         const updateNewPromo = await this.promosModel.findOneAndUpdate(
           {
             _id: promoId,
@@ -412,17 +414,17 @@ export class PromosService {
           },
           {
             $set: {
-              statusPromo: "work",
+              statusPromo: 'work',
               'selectInfluencers.$.confirmation': promoResponse,
             },
           },
         );
-  
+
         return {
           code: 200,
           updateNewPromo,
         };
-      }else {
+      } else {
         const updateNewPromo = await this.promosModel.findOneAndUpdate(
           {
             _id: promoId,
@@ -430,18 +432,31 @@ export class PromosService {
           },
           {
             $set: {
-              
               'selectInfluencers.$.confirmation': promoResponse,
             },
           },
         );
-  
+
+        const checkUserInfluencer = await this.influencerModel.findOne({
+          _id: influencerId,
+        });
+        const checkUserClient = await this.clientModel.findOne({
+          _id: findNewPromo.userId,
+        });
+
+        await sendMail(
+          'admin@soundinfluencers.com',
+          'soundinfluencers',
+          `<p>${checkUserInfluencer.influencerName} declines the offer for ${checkUserClient.company} campaign</p>
+            <p>Details:</p></br><p>Id Promo: ${findNewPromo._id}</p><p>Client Name: ${checkUserClient.firstName}</p><p>Video Link: ${findNewPromo.videoLink}</p>`,
+          'html',
+        );
+
         return {
           code: 200,
           updateNewPromo,
         };
       }
-      
     } catch (err) {
       return {
         code: 500,
@@ -556,9 +571,12 @@ export class PromosService {
           message: 'not found',
         };
       }
+
+      const promoCurrent = await this.promosModel.findOne({ _id: promoId });
       return {
         code: 200,
         promo: currentDataInfluencer,
+        dateRequest: promoCurrent.dateRequest,
       };
     } catch (err) {
       console.log(err);

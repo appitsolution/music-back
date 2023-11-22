@@ -7,6 +7,7 @@ import mongoose from 'mongoose';
 import { Influencer } from './schemas/influencer.schema';
 import { LoginClientDto } from './dto/login-client.dto';
 import { VerifyDto } from './dto/verify.dto';
+import sendMail from 'src/utils/sendMail';
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
@@ -56,6 +57,14 @@ export class AuthService {
         password: bcrypt.hashSync(data.password),
       });
 
+      await sendMail('admin@soundinfluencers.com','soundinfluencers',`Request from a new client ${data.company}`)
+      await sendMail(data.email,'soundinfluencers',`<p>Dear ${data.firstName},</p>
+      <p>Thank you for confirming your information with us. Your account details have been successfully verified. You can now access your personal account by clicking on the link below:</p>
+      <p><a href="https://go.soundinfluencers.com/account/client">Insert Link to Account Access</a></p>
+      <p>If you have any questions or encounter any issues, please don't hesitate to contact our support team or reply to this message.</p>
+      <p>Best regards,</p>
+      <p>SoundInfluencers team</p>`,'html')
+
       return {
         code: 201,
         newUser,
@@ -104,7 +113,14 @@ export class AuthService {
         ...data,
         password: bcrypt.hashSync(data.password),
       });
-
+      await sendMail('admin@soundinfluencers.com','soundinfluencers',`Request from a new partner ${data.influencerName}`)
+      await sendMail(data.email,'soundinfluencers',`<p>Dear ${data.influencerName},</p>
+      <p>Thank you for confirming your information with us. Your account details have been successfully verified. You can now access your personal account by clicking on the link below:</p>
+      <p><a href="https://go.soundinfluencers.com/account/influencer">Insert Link to Account Access</a></p>
+      <p>Please note that a postage fee of 399$ will be applicable for your orders moving forward.</p>
+      <p>If you have any questions or encounter any issues, please don't hesitate to contact our support team or reply to this message.</p>
+      <p>Best regards,</p>
+      <p>SoundInfluencers team</p>`,'html')
       return {
         code: 201,
         newUser,

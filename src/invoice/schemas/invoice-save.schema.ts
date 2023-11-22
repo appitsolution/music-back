@@ -3,7 +3,7 @@ import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 @Schema({
   timestamps: true,
 })
-export class Invoices {
+export class SaveInvoiceData {
   @Prop()
   influencerId: string;
 
@@ -80,4 +80,4 @@ export class Invoices {
   fileUrl: string;
 }
 
-export const InvoicesSchema = SchemaFactory.createForClass(Invoices);
+export const SaveInvoiceDataSchema = SchemaFactory.createForClass(SaveInvoiceData);

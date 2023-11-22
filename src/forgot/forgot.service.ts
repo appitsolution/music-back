@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import { Client } from 'src/auth/schemas/client.schema';
 import { Influencer } from 'src/auth/schemas/influencer.schema';
 import { Forgot } from './schemas/forgot.schema';
+import sendMail from 'src/utils/sendMail';
 
 function generateFourDigitCode() {
   const code = Math.floor(Math.random() * 9000) + 1000;
@@ -45,21 +46,37 @@ export class ForgotService {
           });
 
           if (checkForgot) {
+            const code = generateFourDigitCode()
             await this.forgotModel.findOneAndUpdate(
               { id: checkUserClient.id },
               {
-                code: generateFourDigitCode(),
+                code: code,
               },
             );
+            await sendMail(checkUserClient.email,'soundinfluencers',`<p>Dear ${checkUserClient.firstName},</p>
+            <p>It looks like you've requested a password reset for your account. Please use the following confirmation code to reset your password:</p>
+            <p>Confirmation Code: ${code}</p>
+            <p>You can reset your password by clicking on the 'Forgot Password' link on our website and entering this confirmation code when prompted.</p>
+            <p>If you have any questions or encounter any issues, please don't hesitate to contact our support team or reply to this message.</p>
+            <p>Best regards,</p>
+            <p>SoundInfluencers team</p>`,'html')
             return {
               code: 200,
               message: 'code send',
             };
           } else {
+            const code = generateFourDigitCode()
             await this.forgotModel.create({
               id: checkUserClient.id,
-              code: generateFourDigitCode(),
+              code: code,
             });
+            await sendMail(checkUserClient.email,'soundinfluencers',`<p>Dear ${checkUserClient.firstName},</p>
+            <p>It looks like you've requested a password reset for your account. Please use the following confirmation code to reset your password:</p>
+            <p>Confirmation Code: ${code}</p>
+            <p>You can reset your password by clicking on the 'Forgot Password' link on our website and entering this confirmation code when prompted.</p>
+            <p>If you have any questions or encounter any issues, please don't hesitate to contact our support team or reply to this message.</p>
+            <p>Best regards,</p>
+            <p>SoundInfluencers team</p>`,'html')
             return {
               code: 200,
               message: 'code send',
@@ -70,21 +87,38 @@ export class ForgotService {
             id: checkUserInfluencer.id,
           });
           if (checkForgot) {
+            const code = generateFourDigitCode()
             await this.forgotModel.findOneAndUpdate(
               { id: checkUserInfluencer.id },
               {
-                code: generateFourDigitCode(),
+                code: code,
               },
             );
+            await sendMail(checkUserInfluencer.email,'soundinfluencers',`<p>Dear ${checkUserInfluencer.firstName},</p>
+            <p>It looks like you've requested a password reset for your account. Please use the following confirmation code to reset your password:</p>
+            <p>Confirmation Code: ${code}</p>
+            <p>You can reset your password by clicking on the 'Forgot Password' link on our website and entering this confirmation code when prompted.</p>
+            <p>If you have any questions or encounter any issues, please don't hesitate to contact our support team or reply to this message.</p>
+            <p>Best regards,</p>
+            <p>SoundInfluencers team</p>`,'html')
             return {
               code: 200,
               message: 'code send',
             };
           } else {
+            const code = generateFourDigitCode()
             await this.forgotModel.create({
               id: checkUserInfluencer.id,
-              code: generateFourDigitCode(),
+              code: code,
             });
+
+            await sendMail(checkUserInfluencer.email,'soundinfluencers',`<p>Dear ${checkUserInfluencer.firstName},</p>
+            <p>It looks like you've requested a password reset for your account. Please use the following confirmation code to reset your password:</p>
+            <p>Confirmation Code: ${code}</p>
+            <p>You can reset your password by clicking on the 'Forgot Password' link on our website and entering this confirmation code when prompted.</p>
+            <p>If you have any questions or encounter any issues, please don't hesitate to contact our support team or reply to this message.</p>
+            <p>Best regards,</p>
+            <p>SoundInfluencers team</p>`,'html')
             return {
               code: 200,
               message: 'code send',

@@ -11,6 +11,7 @@ import {
   Influencer,
   InfluencerSchema,
 } from 'src/auth/schemas/influencer.schema';
+import { SaveInvoiceData, SaveInvoiceDataSchema } from './schemas/invoice-save.schema';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import {
       { name: InvoiceDetails.name, schema: InvoiceDetailsSchema },
       { name: Invoices.name, schema: InvoicesSchema },
       { name: Influencer.name, schema: InfluencerSchema },
+      { name: SaveInvoiceData.name, schema: SaveInvoiceDataSchema },
     ]),
   ],
   controllers: [InvoiceController],

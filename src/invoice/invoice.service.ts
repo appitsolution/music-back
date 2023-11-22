@@ -6,6 +6,8 @@ import mongoose from 'mongoose';
 import { Influencer } from 'src/auth/schemas/influencer.schema';
 import { CreateInvoiceDtoDto } from './dto/create-invoice.dto';
 import { Invoices } from './schemas/invoices.schema';
+import { SaveInvoiceData } from './schemas/invoice-save.schema';
+import sendMail from 'src/utils/sendMail';
 
 @Injectable()
 export class InvoiceService {
@@ -16,6 +18,8 @@ export class InvoiceService {
     private influencerModel: mongoose.Model<Influencer>,
     @InjectModel(Invoices.name)
     private invoicesModel: mongoose.Model<Invoices>,
+    @InjectModel(SaveInvoiceData.name)
+    private saveInvoiceDataModel: mongoose.Model<SaveInvoiceData>,
   ) {}
 
   async updateInvoiceDetails(data: UpdateInvoiceDetailsDto) {
@@ -96,6 +100,19 @@ export class InvoiceService {
         ...data,
         status: 'pending',
       });
+      const findSaveData = await this.saveInvoiceDataModel.findOne({influencerId: data.influencerId})
+      if(findSaveData){
+        await this.saveInvoiceDataModel.findByIdAndUpdate({_id: findSaveData._id},data)
+      }else {
+        await this.saveInvoiceDataModel.create(data)
+      }
+
+      await sendMail(
+        'admin@soundinfluencers.com',
+        'soundinfluencers',
+        `<p>Invoice from ${checkUser.influencerName}</p>`,
+        'html',
+      );
       return {
         code: 201,
         result,
@@ -121,6 +138,35 @@ export class InvoiceService {
         code: 200,
         invoices: result,
       };
+    } catch (err) {
+      console.log();
+    }
+  }
+
+  async getInvoiceSave(influencerId: string) {
+    if (!influencerId) {
+      return {
+        status: 400,
+        message: 'Not enough arguments',
+      };
+    }
+
+    try {
+      const result = await this.saveInvoiceDataModel.findOne({
+        influencerId: influencerId,
+      });
+      if(result){
+        return {
+          code: 200,
+          invoice: result,
+        };
+      }else {
+        return {
+          code: 404,
+          message: 'not found'
+        }
+      }
+      
     } catch (err) {
       console.log();
     }

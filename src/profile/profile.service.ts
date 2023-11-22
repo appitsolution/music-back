@@ -12,6 +12,7 @@ import { UpdatePersonalInfluencerDto } from './dto/update-personal-influencer.dt
 import { UpdateMusicStyleInfluencerDto } from './dto/update-music-influencer.dto';
 import { UpdateEmailInfluencerDto } from './dto/update-email-influencer.dto';
 import { UpdatePhoneInfluencerDto } from './dto/update-phone-influencer.dto';
+import sendMail from 'src/utils/sendMail';
 const bcrypt = require('bcryptjs');
 
 @Injectable()
@@ -126,6 +127,13 @@ export class ProfileService {
         {
           email: data.email,
         },
+      );
+
+      await sendMail(
+        checkUser.email,
+        'soundinfluencers',
+        `<p>Email address has been successfully changed in our system. If you have any questions or need further assistance, please contact our support team</p>`,
+        'html',
       );
 
       return {

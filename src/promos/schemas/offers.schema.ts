@@ -13,6 +13,9 @@ export class Offers {
   @Prop()
   maxInfluencer: number;
 
+  @Prop()
+  connectInfluencer: [];
+
 }
 
 export const OffersSchema = SchemaFactory.createForClass(Offers);
