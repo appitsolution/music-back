@@ -501,8 +501,13 @@ export class PromosService {
       const promosName = await Promise.all(
         promos.map(async (item) => {
           const clientName = await this.clientModel.findById(item.userId);
-          if (!clientName) return { ...item, client: 'No Date' };
-          return { ...item, client: clientName.firstName };
+          if (!clientName)
+            return { ...item, client: 'No Date', date: item.createdAt };
+          return {
+            ...item,
+            client: clientName.firstName,
+            date: item.createdAt,
+          };
         }),
       );
 
@@ -573,10 +578,12 @@ export class PromosService {
       }
 
       const promoCurrent = await this.promosModel.findOne({ _id: promoId });
+
       return {
         code: 200,
         promo: currentDataInfluencer,
         dateRequest: promoCurrent.dateRequest,
+        date: promoCurrent.createdAt,
       };
     } catch (err) {
       console.log(err);

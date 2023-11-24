@@ -97,6 +97,9 @@ export class Promos {
 
   @Prop({ required: true })
   statusPromo: string;
+
+  @Prop()
+  createdAt: Date;
 }
 
 export const PromosSchema = SchemaFactory.createForClass(Promos);
