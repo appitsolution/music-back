@@ -8,8 +8,22 @@ import { Influencer } from './schemas/influencer.schema';
 import { LoginClientDto } from './dto/login-client.dto';
 import { VerifyDto } from './dto/verify.dto';
 import sendMail from 'src/utils/sendMail';
+import { VerifyInfluencer } from './schemas/verifyInfluencer.schema';
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+
+function generateRandomString() {
+  const characters =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let randomString = '';
+
+  for (let i = 0; i < 20; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    randomString += characters.charAt(randomIndex);
+  }
+
+  return randomString;
+}
 
 @Injectable()
 export class AuthService {
@@ -19,6 +33,8 @@ export class AuthService {
     private clientModel: mongoose.Model<Client>,
     @InjectModel(Influencer.name)
     private influencerModel: mongoose.Model<Influencer>,
+    @InjectModel(VerifyInfluencer.name)
+    private verifyInfluencerModel: mongoose.Model<VerifyInfluencer>,
   ) {}
 
   async createClient(data: CreateClientDto) {
@@ -57,13 +73,30 @@ export class AuthService {
         password: bcrypt.hashSync(data.password),
       });
 
-      await sendMail('admin@soundinfluencers.com','soundinfluencers',`Request from a new client ${data.company}`)
-      await sendMail(data.email,'soundinfluencers',`<p>Dear ${data.firstName},</p>
+      await sendMail(
+        'admin@soundinfluencers.com',
+        'soundinfluencers',
+        `<p>Request from a new client ${data.company}</p><b>Details:</b><br/><br/><p>First Name: ${data.firstName}</p>
+        <p>Company: ${data.company}</p>
+        <p>Company Type: ${data.companyType}</p>
+        <p>Instagram: ${data.instagram}</p>
+        <p>Email: ${data.email}</p>
+        <p>Phone: ${data.phone}</p>
+        <p>Referal Code: ${data.referalCode}</p>
+        <p>Username: ${data.username}</p>`,
+        'html',
+      );
+      await sendMail(
+        data.email,
+        'soundinfluencers',
+        `<p>Dear ${data.firstName},</p>
       <p>Thank you for confirming your information with us. Your account details have been successfully verified. You can now access your personal account by clicking on the link below:</p>
       <p><a href="https://go.soundinfluencers.com/account/client">Insert Link to Account Access</a></p>
       <p>If you have any questions or encounter any issues, please don't hesitate to contact our support team or reply to this message.</p>
       <p>Best regards,</p>
-      <p>SoundInfluencers team</p>`,'html')
+      <p>SoundInfluencers team</p>`,
+        'html',
+      );
 
       return {
         code: 201,
@@ -113,14 +146,43 @@ export class AuthService {
         ...data,
         password: bcrypt.hashSync(data.password),
       });
-      await sendMail('admin@soundinfluencers.com','soundinfluencers',`Request from a new partner ${data.influencerName}`)
-      await sendMail(data.email,'soundinfluencers',`<p>Dear ${data.influencerName},</p>
+
+      const generateVerifyId = generateRandomString();
+
+      await this.verifyInfluencerModel.create({
+        influencerId: newUser._id,
+        verifyId: generateVerifyId,
+      });
+      await sendMail(
+        'admin@soundinfluencers.com',
+        'soundinfluencers',
+        `<p>Request from a new partner ${data.influencerName}</p><b>Details:</b><br/><br/><p>First Name: ${data.firstName}</p>
+        <p>Influencer Name: ${data.influencerName}</p>
+        <p>Music Style: ${data.musicStyle}</p>
+        <p>Instagram: ${data.instagram}</p>
+        <p>Followers Number: ${data.followersNumber}</p>
+        <p>Email: ${data.email}</p>
+        <p>Phone: ${data.phone}</p>
+        <p>Price: ${data.price}</p>
+        <p>Username: ${data.username}</p>
+        <h2>Do you want to verify your account?</h2>
+        <a href="${process.env.SERVER}/auth/verify-influencer?verifyId=${generateVerifyId}&responseVerify=accept">ACCEPT</a>
+        <a href="${process.env.SERVER}/auth/verify-influencer?verifyId=${generateVerifyId}&responseVerify=cancel">CANCEL</a>
+        `,
+        'html',
+      );
+      await sendMail(
+        data.email,
+        'soundinfluencers',
+        `<p>Dear ${data.influencerName},</p>
       <p>Thank you for confirming your information with us. Your account details have been successfully verified. You can now access your personal account by clicking on the link below:</p>
       <p><a href="https://go.soundinfluencers.com/account/influencer">Insert Link to Account Access</a></p>
       <p>Please note that a postage fee of 399$ will be applicable for your orders moving forward.</p>
       <p>If you have any questions or encounter any issues, please don't hesitate to contact our support team or reply to this message.</p>
       <p>Best regards,</p>
-      <p>SoundInfluencers team</p>`,'html')
+      <p>SoundInfluencers team</p>`,
+        'html',
+      );
       return {
         code: 201,
         newUser,
@@ -129,6 +191,86 @@ export class AuthService {
       console.log(err);
       return {
         code: 500,
+      };
+    }
+  }
+
+  async verifyAdmin(verifyId: string, responseVerify: string) {
+    if (!verifyId || !responseVerify) {
+      return {
+        status: 400,
+        message: 'Not enough arguments',
+      };
+    }
+
+    const checkVerifyAdmin = await this.verifyInfluencerModel.findOne({
+      verifyId: verifyId,
+    });
+
+    if (!checkVerifyAdmin) {
+      return {
+        code: 404,
+        message: 'not found',
+      };
+    }
+
+    const checkInfluencer = await this.influencerModel.findOne({
+      _id: checkVerifyAdmin.influencerId,
+    });
+
+    if (!checkInfluencer) {
+      return {
+        code: 404,
+        message: 'influencer not found ',
+      };
+    }
+
+    if (responseVerify === 'accept') {
+      await this.influencerModel.findOneAndUpdate(
+        { _id: checkInfluencer._id },
+        { statusVerify: responseVerify },
+      );
+
+      await this.verifyInfluencerModel.findOneAndDelete({ verifyId: verifyId });
+
+      sendMail(
+        checkInfluencer.email,
+        'soundinfluencers',
+        `<p>Hi,</p>
+      <p>thanks for the application!</p> 
+      <p>Your account has been verified!</p>`,
+        'html',
+      );
+
+      return {
+        code: 200,
+        message: 'influencer verify',
+      };
+    } else if (responseVerify === 'cancel') {
+      await this.influencerModel.findOneAndUpdate(
+        { _id: checkInfluencer._id },
+        { statusVerify: responseVerify },
+      );
+
+      await this.verifyInfluencerModel.findOneAndDelete({ verifyId: verifyId });
+      sendMail(
+        checkInfluencer.email,
+        'soundinfluencers',
+        `<p>Hi,</p>
+      <p>thanks for the application!</p>
+      <p>Unfortunately we're not sure there's a good fit for us right now.</p>
+      <p>We suggest trying again in the future 🙂</p> 
+      <p>Best Regards</p><p>SoundInfluencers Team</p>`,
+        'html',
+      );
+      return {
+        code: 200,
+        message: 'influencer not verify',
+      };
+    } else {
+      return {
+        code: 200,
+        message: 'response verify is not correct',
       };
     }
   }
@@ -188,6 +330,12 @@ export class AuthService {
     }
 
     if (bcrypt.compareSync(loginInfluencer.password, checkUser.password)) {
+      if (checkUser.statusVerify === 'wait') {
+        return {
+          code: 403,
+          message: 'not verify account',
+        };
+      }
       return {
         code: 200,
         token: jwt.sign(

@@ -39,6 +39,9 @@ export class Influencer {
 
   @Prop()
   password: string;
+
+  @Prop({ default: 'wait' })
+  statusVerify: string;
 }
 
 export const InfluencerSchema = SchemaFactory.createForClass(Influencer);

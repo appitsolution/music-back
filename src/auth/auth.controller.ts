@@ -6,13 +6,14 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateClientDto } from './dto/create-client.dto';
 import { CreateInfluencerDto } from './dto/create-influencer.dto';
 import { LoginClientDto } from './dto/login-client.dto';
 import { VerifyDto } from './dto/verify.dto';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiQuery } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
@@ -26,6 +27,13 @@ export class AuthController {
   @Post('create/influencer')
   createInfluencer(@Body() data: CreateInfluencerDto) {
     return this.authService.createInfluencer(data);
+  }
+
+  @ApiQuery({ name: 'verifyId' })
+  @ApiQuery({ name: 'responseVerify' })
+  @Get('verify-influencer')
+  verifyAdmin(@Query() args: { verifyId: string; responseVerify: string }) {
+    return this.authService.verifyAdmin(args.verifyId, args.responseVerify);
   }
 
   @Post('login/client')
@@ -44,7 +52,7 @@ export class AuthController {
   }
 
   @Get('influencers')
-  getInfluencers(){
-    return this.authService.getInfluencers()
+  getInfluencers() {
+    return this.authService.getInfluencers();
   }
 }
