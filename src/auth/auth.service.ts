@@ -175,10 +175,8 @@ export class AuthService {
         data.email,
         'soundinfluencers',
         `<p>Dear ${data.influencerName},</p>
-      <p>Thank you for confirming your information with us. Your account details have been successfully verified. You can now access your personal account by clicking on the link below:</p>
-      <p><a href="https://go.soundinfluencers.com/account/influencer">Insert Link to Account Access</a></p>
-      <p>Please note that a postage fee of 399$ will be applicable for your orders moving forward.</p>
-      <p>If you have any questions or encounter any issues, please don't hesitate to contact our support team or reply to this message.</p>
+      <p>Thank you for your subscription request submission.</p>
+      <p>An email with a status update will be sent to you soon.</p>
       <p>Best regards,</p>
       <p>SoundInfluencers team</p>`,
         'html',
