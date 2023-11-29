@@ -36,6 +36,18 @@ export class AuthController {
     return this.authService.verifyAdmin(args.verifyId, args.responseVerify);
   }
 
+  @ApiQuery({ name: 'verifyId' })
+  @ApiQuery({ name: 'responseVerify' })
+  @Get('verify-client')
+  verifyAdminClient(
+    @Query() args: { verifyId: string; responseVerify: string },
+  ) {
+    return this.authService.verifyAdminClient(
+      args.verifyId,
+      args.responseVerify,
+    );
+  }
+
   @Post('login/client')
   loginClient(@Body() data: LoginClientDto) {
     return this.authService.loginClient(data);

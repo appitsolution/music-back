@@ -9,6 +9,7 @@ import { LoginClientDto } from './dto/login-client.dto';
 import { VerifyDto } from './dto/verify.dto';
 import sendMail from 'src/utils/sendMail';
 import { VerifyInfluencer } from './schemas/verifyInfluencer.schema';
+import { VerifyClient } from './schemas/verifyClient.schema';
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
@@ -35,6 +36,9 @@ export class AuthService {
     private influencerModel: mongoose.Model<Influencer>,
     @InjectModel(VerifyInfluencer.name)
     private verifyInfluencerModel: mongoose.Model<VerifyInfluencer>,
+
+    @InjectModel(VerifyClient.name)
+    private verifyClientModel: mongoose.Model<VerifyClient>,
   ) {}
 
   async createClient(data: CreateClientDto) {
@@ -68,9 +72,38 @@ export class AuthService {
         };
       }
 
+      const checkUserInstagram = await (async () => {
+        const checkInfluencer = await this.influencerModel.findOne({
+          instagramUsername: data.instagramUsername,
+        });
+
+        if (checkInfluencer) return checkInfluencer;
+
+        const checkClient = await this.clientModel.findOne({
+          instagramUsername: data.instagramUsername,
+        });
+        if (checkClient) return checkClient;
+
+        return null;
+      })();
+
+      if (checkUserInstagram) {
+        return {
+          code: 409,
+          message: 'This instagram already exists',
+        };
+      }
+
       const newUser = await this.clientModel.create({
         ...data,
         password: bcrypt.hashSync(data.password),
+      });
+
+      const generateVerifyId = generateRandomString();
+
+      await this.verifyClientModel.create({
+        clientId: newUser._id,
+        verifyId: generateVerifyId,
       });
 
       await sendMail(
@@ -79,22 +112,24 @@ export class AuthService {
         `<p>Request from a new client ${data.company}</p><b>Details:</b><br/><br/><p>First Name: ${data.firstName}</p>
         <p>Company: ${data.company}</p>
         <p>Company Type: ${data.companyType}</p>
-        <p>Instagram: ${data.instagram}</p>
+        <p>Instagram: ${data.instagramUsername}</p>
         <p>Email: ${data.email}</p>
         <p>Phone: ${data.phone}</p>
         <p>Referal Code: ${data.referalCode}</p>
-        <p>Username: ${data.username}</p>`,
+        <h2>Do you want to verify your account?</h2>
+        <a href="${process.env.SERVER}/auth/verify-client?verifyId=${generateVerifyId}&responseVerify=accept">ACCEPT</a>
+        <a href="${process.env.SERVER}/auth/verify-client?verifyId=${generateVerifyId}&responseVerify=cancel">CANCEL</a>
+        `,
         'html',
       );
       await sendMail(
         data.email,
         'soundinfluencers',
         `<p>Dear ${data.firstName},</p>
-      <p>Thank you for confirming your information with us. Your account details have been successfully verified. You can now access your personal account by clicking on the link below:</p>
-      <p><a href="https://go.soundinfluencers.com/account/client">Insert Link to Account Access</a></p>
-      <p>If you have any questions or encounter any issues, please don't hesitate to contact our support team or reply to this message.</p>
+      <p>Hello,</p>
+      <p>Thank you for submitting your account request. We will inform you of the outcome shortly.</p>
       <p>Best regards,</p>
-      <p>SoundInfluencers team</p>`,
+      <p>The SoundInfluencers.com Team</p>`,
         'html',
       );
 
@@ -142,6 +177,29 @@ export class AuthService {
         };
       }
 
+      const checkUserInstagram = await (async () => {
+        const checkInfluencer = await this.influencerModel.findOne({
+          instagramUsername: data.instagramUsername,
+        });
+
+        if (checkInfluencer) return checkInfluencer;
+
+        const checkClient = await this.clientModel.findOne({
+          instagramUsername: data.instagramUsername,
+        });
+        if (checkClient) return checkClient;
+
+        return null;
+      })();
+
+      if (!checkUserInstagram) {
+      } else {
+        return {
+          code: 409,
+          message: 'This instagram already exists',
+        };
+      }
+
       const newUser = await this.influencerModel.create({
         ...data,
         password: bcrypt.hashSync(data.password),
@@ -159,12 +217,11 @@ export class AuthService {
         `<p>Request from a new partner ${data.influencerName}</p><b>Details:</b><br/><br/><p>First Name: ${data.firstName}</p>
         <p>Influencer Name: ${data.influencerName}</p>
         <p>Music Style: ${data.musicStyle}</p>
-        <p>Instagram: ${data.instagram}</p>
+        <p>Instagram: ${data.instagramUsername}</p>
         <p>Followers Number: ${data.followersNumber}</p>
         <p>Email: ${data.email}</p>
         <p>Phone: ${data.phone}</p>
         <p>Price: ${data.price}</p>
-        <p>Username: ${data.username}</p>
         <h2>Do you want to verify your account?</h2>
         <a href="${process.env.SERVER}/auth/verify-influencer?verifyId=${generateVerifyId}&responseVerify=accept">ACCEPT</a>
         <a href="${process.env.SERVER}/auth/verify-influencer?verifyId=${generateVerifyId}&responseVerify=cancel">CANCEL</a>
@@ -236,7 +293,7 @@ export class AuthService {
         'soundinfluencers',
         `<p>Hi,</p>
       <p>thanks for the application!</p> 
-      <p>Your account has been verified!</p>`,
+      <p>Your account has been verified!</p><a href="${process.env.SERVER_CLIENT}/login/influencer">Go to Authorization</a>`,
         'html',
       );
 
@@ -273,6 +330,86 @@ export class AuthService {
     }
   }
 
+  async verifyAdminClient(verifyId: string, responseVerify: string) {
+    if (!verifyId || !responseVerify) {
+      return {
+        status: 400,
+        message: 'Not enough arguments',
+      };
+    }
+
+    const checkVerifyAdmin = await this.verifyClientModel.findOne({
+      verifyId: verifyId,
+    });
+
+    if (!checkVerifyAdmin) {
+      return {
+        code: 404,
+        message: 'not found',
+      };
+    }
+
+    const checkClient = await this.clientModel.findOne({
+      _id: checkVerifyAdmin.clientId,
+    });
+
+    if (!checkClient) {
+      return {
+        code: 404,
+        message: 'client not found ',
+      };
+    }
+
+    if (responseVerify === 'accept') {
+      await this.clientModel.findOneAndUpdate(
+        { _id: checkClient._id },
+        { statusVerify: responseVerify },
+      );
+
+      await this.verifyClientModel.findOneAndDelete({ verifyId: verifyId });
+
+      sendMail(
+        checkClient.email,
+        'soundinfluencers',
+        `<p>Hi,</p>
+      <p>thanks for the application!</p> 
+      <p>Your account has been verified!</p><a href="${process.env.SERVER_CLIENT}/login/client">Go to Authorization</a>`,
+        'html',
+      );
+
+      return {
+        code: 200,
+        message: 'client verify',
+      };
+    } else if (responseVerify === 'cancel') {
+      await this.clientModel.findOneAndUpdate(
+        { _id: checkClient._id },
+        { statusVerify: responseVerify },
+      );
+
+      await this.verifyClientModel.findOneAndDelete({ verifyId: verifyId });
+      sendMail(
+        checkClient.email,
+        'soundinfluencers',
+        `<p>Hi,</p>
+      <p>thanks for the application!</p>
+      <p>Unfortunately we're not sure there's a good fit for us right now.</p>
+      <p>We suggest trying again in the future 🙂</p> 
+      <p>Best Regards</p><p>SoundInfluencers Team</p>`,
+        'html',
+      );
+      return {
+        code: 200,
+        message: 'client not verify',
+      };
+    } else {
+      return {
+        code: 200,
+        message: 'response verify is not correct',
+      };
+    }
+  }
+
   async loginClient(loginClient: LoginClientDto) {
     if (!loginClient.email || !loginClient.password) {
       return {
@@ -293,6 +430,12 @@ export class AuthService {
     }
 
     if (bcrypt.compareSync(loginClient.password, checkUser.password)) {
+      if (checkUser.statusVerify === 'wait') {
+        return {
+          code: 403,
+          message: 'not verify account',
+        };
+      }
       return {
         code: 200,
         token: jwt.sign(

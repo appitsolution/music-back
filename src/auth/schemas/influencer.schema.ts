@@ -20,7 +20,7 @@ export class Influencer {
   musicStyle: string;
 
   @Prop()
-  instagram: string;
+  instagramUsername: string;
 
   @Prop()
   followersNumber: string;
@@ -33,9 +33,6 @@ export class Influencer {
 
   @Prop()
   price: string;
-
-  @Prop()
-  username: string;
 
   @Prop()
   password: string;

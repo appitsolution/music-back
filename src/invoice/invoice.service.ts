@@ -98,13 +98,18 @@ export class InvoiceService {
 
       const result = await this.invoicesModel.create({
         ...data,
-        status: 'pending',
+        status: 'in progress',
       });
-      const findSaveData = await this.saveInvoiceDataModel.findOne({influencerId: data.influencerId})
-      if(findSaveData){
-        await this.saveInvoiceDataModel.findByIdAndUpdate({_id: findSaveData._id},data)
-      }else {
-        await this.saveInvoiceDataModel.create(data)
+      const findSaveData = await this.saveInvoiceDataModel.findOne({
+        influencerId: data.influencerId,
+      });
+      if (findSaveData) {
+        await this.saveInvoiceDataModel.findByIdAndUpdate(
+          { _id: findSaveData._id },
+          data,
+        );
+      } else {
+        await this.saveInvoiceDataModel.create(data);
       }
 
       await sendMail(
@@ -155,18 +160,17 @@ export class InvoiceService {
       const result = await this.saveInvoiceDataModel.findOne({
         influencerId: influencerId,
       });
-      if(result){
+      if (result) {
         return {
           code: 200,
           invoice: result,
         };
-      }else {
+      } else {
         return {
           code: 404,
-          message: 'not found'
-        }
+          message: 'not found',
+        };
       }
-      
     } catch (err) {
       console.log();
     }

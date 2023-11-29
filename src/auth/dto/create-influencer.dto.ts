@@ -11,7 +11,7 @@ export class CreateInfluencerDto {
   musicStyle: string;
 
   @ApiProperty()
-  instagram: string;
+  instagramUsername: string;
 
   @ApiProperty()
   followersNumber: string;
@@ -24,9 +24,6 @@ export class CreateInfluencerDto {
 
   @ApiProperty()
   price: string;
-
-  @ApiProperty()
-  username: string;
 
   @ApiProperty()
   password: string;

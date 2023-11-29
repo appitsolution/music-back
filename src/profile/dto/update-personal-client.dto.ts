@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdatePersonalClientDto {
-
   @ApiProperty({ required: true })
   id: string;
 
@@ -9,10 +8,7 @@ export class UpdatePersonalClientDto {
   firstName: string;
 
   @ApiProperty({ required: true })
-  username: string;
-
-  @ApiProperty({ required: true })
-  instagram: string;
+  instagramUsername: string;
 
   @ApiProperty({ required: true })
   referalCode: string;

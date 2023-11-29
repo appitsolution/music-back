@@ -8,6 +8,10 @@ import {
   VerifyInfluencer,
   VerifyInfluencerSchema,
 } from './schemas/verifyInfluencer.schema';
+import {
+  VerifyClient,
+  VerifyClientSchema,
+} from './schemas/verifyClient.schema';
 
 @Module({
   imports: [
@@ -15,6 +19,7 @@ import {
       { name: Client.name, schema: ClientSchema },
       { name: Influencer.name, schema: InfluencerSchema },
       { name: VerifyInfluencer.name, schema: VerifyInfluencerSchema },
+      { name: VerifyClient.name, schema: VerifyClientSchema },
     ]),
   ],
   controllers: [AuthController],

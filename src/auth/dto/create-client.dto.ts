@@ -11,7 +11,7 @@ export class CreateClientDto {
   companyType: string;
 
   @ApiProperty({ required: true })
-  instagram: string;
+  instagramUsername: string;
 
   @ApiProperty({ required: true })
   email: string;
@@ -21,9 +21,6 @@ export class CreateClientDto {
 
   @ApiProperty({ required: true })
   referalCode: string;
-
-  @ApiProperty({ required: true })
-  username: string;
 
   @ApiProperty({ required: true })
   password: string;

@@ -33,8 +33,6 @@ export class ProfileService {
         };
       }
 
-
-
       const checkUser = await this.clientModel.findOne({ _id: data.id });
 
       if (!checkUser) {
@@ -47,8 +45,7 @@ export class ProfileService {
         { _id: data.id },
         {
           firstName: data.firstName,
-          username: data.username,
-          instagram: data.instagram,
+          instagramUsername: data.instagramUsername,
           refelarCode: data.referalCode,
         },
       );
@@ -65,7 +62,6 @@ export class ProfileService {
       };
     }
   }
-
 
   async updateCompanyClient(data: UpdateCompanyClientDto) {
     try {
@@ -195,8 +191,6 @@ export class ProfileService {
         };
       }
 
-
-
       const checkUser = await this.influencerModel.findOne({ _id: data.id });
 
       if (!checkUser) {
@@ -209,8 +203,7 @@ export class ProfileService {
         { _id: data.id },
         {
           firstName: data.firstName,
-          username: data.username,
-          instagram: data.instagram,
+          instagramUsername: data.instagramUsername,
           influencerName: data.influencerName,
           followersNumber: data.followersNumber,
         },
@@ -228,7 +221,6 @@ export class ProfileService {
       };
     }
   }
-
 
   async updateMusicStyleInfluencer(data: UpdateMusicStyleInfluencerDto) {
     try {
@@ -357,8 +349,6 @@ export class ProfileService {
         };
       }
 
-     
-
       if (data.role === 'client') {
         const checkUser = await this.clientModel.findOne({ _id: data.id });
 
@@ -387,7 +377,7 @@ export class ProfileService {
           code: 400,
           message: 'password is not correct',
         };
-      }else if(data.role === 'influencer'){
+      } else if (data.role === 'influencer') {
         const checkUser = await this.influencerModel.findOne({ _id: data.id });
 
         if (!checkUser) {
@@ -396,7 +386,7 @@ export class ProfileService {
             message: 'User not found',
           };
         }
-  
+
         if (bcrypt.compareSync(data.currentPassword, checkUser.password)) {
           await this.influencerModel.findOneAndUpdate(
             { _id: data.id },
@@ -404,22 +394,22 @@ export class ProfileService {
               password: bcrypt.hashSync(data.newPassword),
             },
           );
-  
+
           return {
             code: 200,
             message: 'personal data update',
           };
         }
-  
+
         return {
           code: 400,
           message: 'password is not correct',
         };
-      }else {
+      } else {
         return {
           code: 400,
-          message: 'role is not correct'
-        }
+          message: 'role is not correct',
+        };
       }
     } catch (err) {
       console.log(err);

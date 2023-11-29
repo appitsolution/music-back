@@ -16,7 +16,7 @@ export class Client {
   companyType: string;
 
   @Prop()
-  instagram: string;
+  instagramUsername: string;
 
   @Prop()
   email: string;
@@ -28,10 +28,10 @@ export class Client {
   referalCode: string;
 
   @Prop()
-  username: string;
-
-  @Prop()
   password: string;
+
+  @Prop({ default: 'wait' })
+  statusVerify: string;
 }
 
 export const ClientSchema = SchemaFactory.createForClass(Client);
