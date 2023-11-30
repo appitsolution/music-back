@@ -291,9 +291,13 @@ export class AuthService {
       sendMail(
         checkInfluencer.email,
         'soundinfluencers',
-        `<p>Hi,</p>
-      <p>thanks for the application!</p> 
-      <p>Your account has been verified!</p><a href="${process.env.SERVER_CLIENT}/login/influencer">Go to Authorization</a>`,
+        `<p>Dear ${checkInfluencer.firstName},</p>
+        <p>Thank you for confirming your information with us. Your account details have been successfully verified.</p> 
+        <p>You can now access your personal account by clicking on the link below:</p>
+        <a href="${process.env.SERVER_CLIENT}/login/influencer">Insert Link to Account Access</a>
+        <p>If you have any questions or encounter any issues, please don't hesitate to contact our support team or reply to this message.</p>
+        <p>Best regards,</p>
+        <p>SoundInfluencers team</p>`,
         'html',
       );
 
@@ -371,9 +375,13 @@ export class AuthService {
       sendMail(
         checkClient.email,
         'soundinfluencers',
-        `<p>Hi,</p>
-      <p>thanks for the application!</p> 
-      <p>Your account has been verified!</p><a href="${process.env.SERVER_CLIENT}/login/client">Go to Authorization</a>`,
+        `<p>Dear ${checkClient.firstName},</p>
+<p>Thank you for confirming your information with us. Your account details have been successfully verified.</p>
+<p>You can now access your personal account by clicking on the link below:</p>
+<a href="${process.env.SERVER_CLIENT}/login/client">Insert Link to Account Access</a>
+<p>If you have any questions or encounter any issues, please don't hesitate to contact our support team or reply to this message.</p>
+<p>Best regards,</p>
+<p>SoundInfluencers team</p>`,
         'html',
       );
 
