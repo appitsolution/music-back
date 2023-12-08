@@ -363,15 +363,29 @@ export class PromosService {
         .lean();
       const promosName = await Promise.all(
         promos.map(async (item) => {
-          const clientName = await this.clientModel.findById(item.userId);
-          if (!clientName) return { ...item, client: 'No Date' };
-          return { ...item, client: clientName.firstName };
+          const listInstagram = await Promise.all(
+            item.selectInfluencers.map(async (ins) => {
+              const client = await this.clientModel.findById(item.userId);
+              const clientName = !client ? 'No Date' : client.firstName;
+
+              if (ins.influencerId === influencerId) {
+                let { selectInfluencers, ...newObject } = item;
+                return {
+                  ...newObject,
+                  instagramUsername: ins.instagramUsername,
+                  client: clientName,
+                };
+              }
+            }),
+          );
+
+          return listInstagram;
         }),
       );
 
       return {
         code: 200,
-        promos: promosName,
+        promos: promosName.flat(),
       };
     } catch (err) {
       console.log(err);
@@ -384,10 +398,11 @@ export class PromosService {
 
   async updateResponseNewPromo(
     influencerId: string,
+    instagramUsername: string,
     promoId: string,
     promoResponse: string,
   ) {
-    if (!influencerId || !promoId || !promoResponse) {
+    if (!influencerId || !instagramUsername || !promoId || !promoResponse) {
       return {
         status: 400,
         message: 'Not enough arguments',
@@ -397,7 +412,12 @@ export class PromosService {
     try {
       const findNewPromo = await this.promosModel.findOne({
         _id: promoId,
-        selectInfluencers: { $elemMatch: { influencerId: influencerId } },
+        selectInfluencers: {
+          $elemMatch: {
+            influencerId: influencerId,
+            instagramUsername: instagramUsername,
+          },
+        },
       });
 
       if (!findNewPromo) {
@@ -410,7 +430,12 @@ export class PromosService {
         const updateNewPromo = await this.promosModel.findOneAndUpdate(
           {
             _id: promoId,
-            selectInfluencers: { $elemMatch: { influencerId: influencerId } },
+            selectInfluencers: {
+              $elemMatch: {
+                influencerId: influencerId,
+                instagramUsername: instagramUsername,
+              },
+            },
           },
           {
             $set: {
@@ -428,7 +453,12 @@ export class PromosService {
         const updateNewPromo = await this.promosModel.findOneAndUpdate(
           {
             _id: promoId,
-            selectInfluencers: { $elemMatch: { influencerId: influencerId } },
+            selectInfluencers: {
+              $elemMatch: {
+                influencerId: influencerId,
+                instagramUsername: instagramUsername,
+              },
+            },
           },
           {
             $set: {
@@ -447,7 +477,7 @@ export class PromosService {
         await sendMail(
           'admin@soundinfluencers.com',
           'soundinfluencers',
-          `<p>${checkUserInfluencer.influencerName} declines the offer for ${checkUserClient.company} campaign</p>
+          `<p>${checkUserInfluencer.firstName} declines the offer for ${checkUserClient.company} campaign</p>
             <p>Details:</p></br><p>Id Promo: ${findNewPromo._id}</p><p>Client Name: ${checkUserClient.firstName}</p><p>Video Link: ${findNewPromo.videoLink}</p>`,
           'html',
         );
@@ -594,8 +624,13 @@ export class PromosService {
     }
   }
 
-  async updateOngoingPromo(influencerId: string, promoId: string, data: any) {
-    if (!influencerId || !promoId) {
+  async updateOngoingPromo(
+    influencerId: string,
+    instagramUsername: string,
+    promoId: string,
+    data: any,
+  ) {
+    if (!influencerId || !promoId || !instagramUsername) {
       return {
         status: 400,
         message: 'Not enough arguments',
@@ -605,7 +640,12 @@ export class PromosService {
     try {
       const findNewPromo = await this.promosModel.findOne({
         _id: promoId,
-        selectInfluencers: { $elemMatch: { influencerId: influencerId } },
+        selectInfluencers: {
+          $elemMatch: {
+            influencerId: influencerId,
+            instagramUsername: instagramUsername,
+          },
+        },
       });
 
       if (!findNewPromo) {
@@ -618,11 +658,16 @@ export class PromosService {
       const updateNewPromo = await this.promosModel.findOneAndUpdate(
         {
           _id: promoId,
-          selectInfluencers: { $elemMatch: { influencerId: influencerId } },
+          selectInfluencers: {
+            $elemMatch: {
+              influencerId: influencerId,
+              instagramUsername: instagramUsername,
+            },
+          },
         },
         {
           $set: {
-            'selectInfluencers.$': data, // Заменяем найденный элемент массива на новый
+            'selectInfluencers.$': data,
           },
         },
       );

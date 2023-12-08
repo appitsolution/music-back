@@ -11,8 +11,6 @@ export class UpdatePersonalInfluencerDto {
   influencerName: string;
 
   @ApiProperty({ required: true })
-  instagramUsername: string;
+  instagram: [];
 
-  @ApiProperty({ required: true })
-  followersNumber: string;
 }

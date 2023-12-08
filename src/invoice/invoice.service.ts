@@ -115,7 +115,7 @@ export class InvoiceService {
       await sendMail(
         'admin@soundinfluencers.com',
         'soundinfluencers',
-        `<p>Invoice from ${checkUser.influencerName}</p>`,
+        `<p>Invoice from ${checkUser.firstName}</p>`,
         'html',
       );
       return {

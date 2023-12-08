@@ -203,9 +203,8 @@ export class ProfileService {
         { _id: data.id },
         {
           firstName: data.firstName,
-          instagramUsername: data.instagramUsername,
+          instagram: data.instagram,
           influencerName: data.influencerName,
-          followersNumber: data.followersNumber,
         },
       );
 

@@ -17,6 +17,9 @@ export class SelectInfluencers {
   influencerId: string;
 
   @Prop()
+  instagramUsername: string;
+
+  @Prop()
   confirmation: string;
 
   @Prop({ default: '' })

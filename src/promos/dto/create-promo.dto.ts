@@ -21,10 +21,10 @@ export class CreatePromosDto {
     required: true,
     type: 'array',
     items: {
-      type: 'number',
+      type: 'object',
     },
   })
-  selectInfluencers: number[];
+  selectInfluencers: [];
 
   @ApiProperty({ required: true })
   videoLink: string;

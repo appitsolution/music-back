@@ -178,30 +178,68 @@ export class AuthService {
       }
 
       const checkUserInstagram = await (async () => {
-        const checkInfluencer = await this.influencerModel.findOne({
-          instagramUsername: data.instagramUsername,
+        const listInfluencer = await this.influencerModel.find({});
+
+        let isHaveInstagramInfluencer = false;
+
+        const dataInstagramLogin = data.instagram.map((item) => {
+          return item.instagramUsername;
         });
 
-        if (checkInfluencer) return checkInfluencer;
+        await Promise.all(
+          listInfluencer.map(async (item) => {
+            item.instagram.forEach((ins) => {
+              if (dataInstagramLogin.includes(ins.instagramUsername)) {
+                isHaveInstagramInfluencer = true;
+              }
+            });
+          }),
+        );
 
-        const checkClient = await this.clientModel.findOne({
-          instagramUsername: data.instagramUsername,
-        });
-        if (checkClient) return checkClient;
+        if (isHaveInstagramInfluencer) return true;
+
+        let isHaveInstagramClient = false;
+        await Promise.all(
+          data.instagram.map(async (item) => {
+            const checkClient = await this.clientModel.findOne({
+              instagramUsername: item.instagramUsername,
+            });
+
+            if (checkClient) {
+              isHaveInstagramClient = true;
+            }
+          }),
+        );
+
+        if (isHaveInstagramClient) return true;
 
         return null;
       })();
 
-      if (!checkUserInstagram) {
-      } else {
+      if (checkUserInstagram) {
         return {
           code: 409,
           message: 'This instagram already exists',
         };
       }
 
+      const checkInstagram = data.instagram.map((item) => {
+        if (item.musicStyle === 'Other') {
+          return {
+            ...item,
+            musicStyle: item.musicStyleOther,
+          };
+        } else {
+          return {
+            ...item,
+            musicStyle: item.musicStyle,
+          };
+        }
+      });
+
       const newUser = await this.influencerModel.create({
         ...data,
+        instagram: checkInstagram,
         password: bcrypt.hashSync(data.password),
       });
 
@@ -214,24 +252,33 @@ export class AuthService {
       await sendMail(
         'admin@soundinfluencers.com',
         'soundinfluencers',
-        `<p>Request from a new partner ${data.influencerName}</p><b>Details:</b><br/><br/><p>First Name: ${data.firstName}</p>
-        <p>Influencer Name: ${data.influencerName}</p>
-        <p>Music Style: ${data.musicStyle}</p>
-        <p>Instagram: ${data.instagramUsername}</p>
-        <p>Followers Number: ${data.followersNumber}</p>
+        `<p>Request from a new partner ${
+          data.firstName
+        }</p><b>Details:</b><br/><br/><p>First Name: ${data.firstName}</p>
+        ${data.instagram.map(
+          (item, index) =>
+            ` <p>(${index + 1}) Music Style: ${item.musicStyle}</p>
+            <p>(${index + 1}) Instagram: ${item.instagramUsername}</p>
+          <p>(${index + 1}) Followers Number: ${item.followersNumber}</p>,
+          <p>(${index + 1}) Logo: ${item.logo}</p>,
+          <p>(${index + 1}) Price: ${item.price}</p>`,
+        )}
         <p>Email: ${data.email}</p>
         <p>Phone: ${data.phone}</p>
-        <p>Price: ${data.price}</p>
         <h2>Do you want to verify your account?</h2>
-        <a href="${process.env.SERVER}/auth/verify-influencer?verifyId=${generateVerifyId}&responseVerify=accept">ACCEPT</a>
-        <a href="${process.env.SERVER}/auth/verify-influencer?verifyId=${generateVerifyId}&responseVerify=cancel">CANCEL</a>
+        <a href="${
+          process.env.SERVER
+        }/auth/verify-influencer?verifyId=${generateVerifyId}&responseVerify=accept">ACCEPT</a>
+        <a href="${
+          process.env.SERVER
+        }/auth/verify-influencer?verifyId=${generateVerifyId}&responseVerify=cancel">CANCEL</a>
         `,
         'html',
       );
       await sendMail(
         data.email,
         'soundinfluencers',
-        `<p>Dear ${data.influencerName},</p>
+        `<p>Dear ${data.firstName},</p>
       <p>Thank you for your subscription request submission.</p>
       <p>An email with a status update will be sent to you soon.</p>
       <p>Best regards,</p>
@@ -294,7 +341,7 @@ export class AuthService {
         `<p>Dear ${checkInfluencer.firstName},</p>
         <p>Thank you for confirming your information with us. Your account details have been successfully verified.</p> 
         <p>You can now access your personal account by clicking on the link below:</p>
-        <a href="${process.env.SERVER_CLIENT}/login/influencer">Insert Link to Account Access</a>
+        <a href="${process.env.SERVER_CLIENT}/login/influencer" style="font-weight: 600">*Access Link*</a>
         <p>If you have any questions or encounter any issues, please don't hesitate to contact our support team or reply to this message.</p>
         <p>Best regards,</p>
         <p>SoundInfluencers team</p>`,
@@ -378,7 +425,7 @@ export class AuthService {
         `<p>Dear ${checkClient.firstName},</p>
 <p>Thank you for confirming your information with us. Your account details have been successfully verified.</p>
 <p>You can now access your personal account by clicking on the link below:</p>
-<a href="${process.env.SERVER_CLIENT}/login/client">Insert Link to Account Access</a>
+<a href="${process.env.SERVER_CLIENT}/login/client" style="font-weight: 600">*Access Link*</a>
 <p>If you have any questions or encounter any issues, please don't hesitate to contact our support team or reply to this message.</p>
 <p>Best regards,</p>
 <p>SoundInfluencers team</p>`,
@@ -543,12 +590,22 @@ export class AuthService {
   async getInfluencers() {
     try {
       const getInfluencersAll = await this.influencerModel
-        .find({})
-        .select(['-password', '-balance', '-phone', '-email']);
+        .find({ statusVerify: 'accept' })
+        .select(['-password', '-balance', '-phone', '-email'])
+        .lean()
+        .exec();
+
+      const listInstagram = getInfluencersAll.map((item) => {
+        if (!Array.isArray(item.instagram)) return [];
+        return item.instagram.map((itemIns) => ({
+          ...itemIns,
+          _id: item._id,
+        }));
+      });
 
       return {
         code: 200,
-        influencers: getInfluencersAll,
+        influencers: listInstagram.flat(),
       };
     } catch (err) {
       console.log(err);
