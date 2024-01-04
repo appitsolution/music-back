@@ -26,6 +26,15 @@ function generateRandomString() {
   return randomString;
 }
 
+function generateRandomDigits(length) {
+  const result = [];
+  for (let i = 0; i < length; i++) {
+    const randomDigit = Math.floor(Math.random() * 10);
+    result.push(randomDigit);
+  }
+  return result.join('');
+}
+
 @Injectable()
 export class AuthService {
   private readonly secretKey = '9fgfdrdr@fdfd';
@@ -96,6 +105,7 @@ export class AuthService {
 
       const newUser = await this.clientModel.create({
         ...data,
+        referenceNumber: generateRandomDigits(6),
         password: bcrypt.hashSync(data.password),
       });
 

@@ -101,6 +101,10 @@ export class Promos {
   @Prop({ required: true })
   statusPromo: string;
 
+
+  @Prop({default: 'wait'})
+  verifyPromo: string;
+
   @Prop()
   createdAt: Date;
 }

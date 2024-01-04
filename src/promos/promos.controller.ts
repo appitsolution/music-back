@@ -22,6 +22,13 @@ export class PromosController {
     return this.promosService.createPromos(data);
   }
 
+  @ApiQuery({ name: 'promoId', required: true })
+  @ApiQuery({ name: 'status', required: true })
+  @Get('verify-promo')
+  verifyPromo(@Query() args: { promoId: string; status: string }) {
+    return this.promosService.verifyPromo(args.promoId, args.status);
+  }
+
   @Get('offers')
   getOffers() {
     return this.promosService.getOffers();
@@ -105,6 +112,7 @@ export class PromosController {
       args.promoId,
     );
   }
+
   @ApiQuery({ name: 'influencerId', required: true })
   @ApiQuery({ name: 'instagramUsername', required: true })
   @ApiQuery({ name: 'promoId', required: true })
@@ -115,10 +123,10 @@ export class PromosController {
       influencerId: string;
       instagramUsername: string;
       promoId: string;
-      promoResponse: string;
     },
     @Body() body,
   ) {
+    console.log(args);
     return this.promosService.updateOngoingPromo(
       args.influencerId,
       args.instagramUsername,

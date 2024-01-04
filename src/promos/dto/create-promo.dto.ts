@@ -1,6 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
 import mongoose from 'mongoose';
 
+interface selectInfluencersType {
+  influencerId: string;
+  instagramUsername: string;
+  confirmation: string;
+  brand: string;
+  datePost: string;
+  caption: string;
+  video: string;
+  postLink: string;
+  screenshot: string;
+  impressions: string;
+  reach: string;
+  like: string;
+  invoice: string;
+}
+
 export class CreatePromosDto {
   @ApiProperty({ required: true })
   userId: string;
@@ -24,7 +40,7 @@ export class CreatePromosDto {
       type: 'object',
     },
   })
-  selectInfluencers: [];
+  selectInfluencers: selectInfluencersType[];
 
   @ApiProperty({ required: true })
   videoLink: string;

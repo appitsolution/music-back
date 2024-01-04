@@ -22,9 +22,14 @@ export class PaymentController {
     return this.paymentService.createOrderStripe(data);
   }
 
+  @Post('create-order-tranfer')
+  createOrderTransfer(@Body() data: CreateOrderStripe) {
+    return this.paymentService.createOrderTransfer(data);
+  }
+
   @Get('accept-order-stripe')
-  acceptOrderStripe(@Query() args: { orderId: string }) {
-    return this.paymentService.acceptOrderStripe(args.orderId);
+  acceptOrderStripe(@Query() args: { orderId: string }, @Res() res: Response) {
+    return this.paymentService.acceptOrderStripe(args.orderId, res);
   }
 
   @Get('cancel-order-stripe')

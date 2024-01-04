@@ -47,6 +47,7 @@ export class ProfileService {
           firstName: data.firstName,
           instagramUsername: data.instagramUsername,
           refelarCode: data.referalCode,
+          logo: data.logo,
         },
       );
 

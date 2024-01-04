@@ -9,4 +9,7 @@ export class CreateOrderStripe {
 
   @ApiProperty({ required: true })
   amount: string;
+
+  @ApiProperty({ default: 'stripe' })
+  paymentMethod: string;
 }

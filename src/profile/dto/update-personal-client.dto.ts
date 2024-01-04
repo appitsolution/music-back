@@ -12,4 +12,7 @@ export class UpdatePersonalClientDto {
 
   @ApiProperty({ required: true })
   referalCode: string;
+
+  @ApiProperty({ required: true })
+  logo: string;
 }

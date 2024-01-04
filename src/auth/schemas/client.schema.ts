@@ -32,6 +32,12 @@ export class Client {
 
   @Prop({ default: 'wait' })
   statusVerify: string;
+
+  @Prop()
+  referenceNumber: string;
+
+  @Prop({ default: '' })
+  logo: string;
 }
 
 export const ClientSchema = SchemaFactory.createForClass(Client);

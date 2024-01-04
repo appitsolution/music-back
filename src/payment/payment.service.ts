@@ -4,7 +4,7 @@ import { AcceptOrderStripe } from './dto/accept-payment.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 import { Payment } from './schemas/payment.entity';
-const stripe = require('stripe')('sk_test_4eC39HqLyjWDarjtT1zdp7dc');
+const stripe = require('stripe')(process.env.STRIPE_KEY);
 
 function generateId() {
   const length = 10;
@@ -41,6 +41,7 @@ export class PaymentService {
     const createId = generateId();
     try {
       const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card', 'paypal'],
         line_items: [
           {
             price_data: {
@@ -84,7 +85,44 @@ export class PaymentService {
     }
   }
 
-  async acceptOrderStripe(orderId: string) {
+  async createOrderTransfer(data: CreateOrderStripe) {
+    if (
+      !data.amount ||
+      typeof data.amount !== `number` ||
+      !data.nameProduct ||
+      !data.userId
+    ) {
+      return {
+        code: 400,
+        message: 'Not enough arguments',
+      };
+    }
+    const createId = generateId();
+
+    try {
+      await this.paymentModel.create({
+        orderId: createId,
+        userId: data.userId,
+        amount: String(data.amount),
+        statusOrder: 'accept',
+        paymentType: 'transfer',
+      });
+
+      return {
+        code: 201,
+        message: 'ok',
+      };
+    } catch (err) {
+      console.log(err);
+
+      return {
+        code: 500,
+        message: err,
+      };
+    }
+  }
+
+  async acceptOrderStripe(orderId: string, res: any) {
     if (!orderId) {
       return {
         code: 400,
@@ -105,6 +143,10 @@ export class PaymentService {
       await this.paymentModel.findOneAndUpdate(
         { _id: checkOrder._id },
         { statusOrder: 'accept' },
+      );
+
+      res.redirect(
+        `${process.env.SERVER_CLIENT}/account/client/ongoing-promos`,
       );
 
       return {
@@ -143,7 +185,7 @@ export class PaymentService {
         { statusOrder: 'cancel' },
       );
 
-      res.redirect('http://localhost:3001/account/client');
+      res.redirect(`${process.env.SERVER_CLIENT}/account/client`);
 
       return {
         code: 200,
