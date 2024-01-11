@@ -4,6 +4,7 @@ interface typesInstagram {
   musicStyle: string;
   musicStyleOther: string;
   instagramUsername: string;
+  instagramLink: string;
   followersNumber: string;
   logo: string;
   price: string;
@@ -13,6 +14,7 @@ const typesInstagramApi = {
   musicStyle: { type: 'string' },
   musicStyleOther: { type: 'string' },
   instagramUsername: { type: 'string' },
+  instagramLink: { type: 'string' },
   followersNumber: { type: 'string' },
   logo: { type: 'string' },
   price: { type: 'string' },

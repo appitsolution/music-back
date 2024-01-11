@@ -3,6 +3,7 @@ import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 interface typesInstagram {
   musicStyle: string;
   instagramUsername: string;
+  instagramLink: string,
   followersNumber: string;
   logo: string;
   price: string;
@@ -11,6 +12,7 @@ interface typesInstagram {
 const typesInstagramApi = {
   musicStyle: String,
   instagramUsername: String,
+  instagramLink: String,
   followersNumber: String,
   logo: String,
   price: String,

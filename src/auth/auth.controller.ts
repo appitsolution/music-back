@@ -32,8 +32,13 @@ export class AuthController {
   @ApiQuery({ name: 'verifyId' })
   @ApiQuery({ name: 'responseVerify' })
   @Get('verify-influencer')
-  verifyAdmin(@Query() args: { verifyId: string; responseVerify: string }) {
-    return this.authService.verifyAdmin(args.verifyId, args.responseVerify);
+  verifyAdminInfluencer(
+    @Query() args: { verifyId: string; responseVerify: string },
+  ) {
+    return this.authService.verifyAdminInfluencer(
+      args.verifyId,
+      args.responseVerify,
+    );
   }
 
   @ApiQuery({ name: 'verifyId' })

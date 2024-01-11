@@ -70,8 +70,7 @@ export class PromosService {
 
           <p>Influencers Chosen:</p><br/><br/>
           ${data.selectInfluencers.map(
-            (item, index) =>
-              `<p>Instagram name: ${item.instagramUsername}</p><br/>`,
+            (item, index) => `<p>Instagram name: ${item.instagramUsername}</p>`,
           )}<br/><br/>
 
           Payment Method Used: ${result.paymentType}
@@ -280,12 +279,18 @@ export class PromosService {
             item.influencerId,
           );
 
+          const searchInstagram = nameInfluencer.instagram.find(
+            (fin) => fin.instagramUsername === item.instagramUsername,
+          );
+
+          console.log(searchInstagram);
+
           if (!nameInfluencer)
             return { ...item, firstName: '', followersNumber: null };
           return {
             ...item,
             firstName: nameInfluencer.firstName,
-            followersNumber: nameInfluencer.followersNumber,
+            followersNumber: searchInstagram.followersNumber,
           };
         }),
       );
@@ -295,6 +300,7 @@ export class PromosService {
         promo: {
           ...promo,
           selectInfluencers: addInfluencer,
+          brand: !clientName ? 'No Date' : clientName.instagramUsername,
           client: !clientName ? 'No Date' : clientName.firstName,
           dateRequest: promo.dateRequest,
         },
@@ -403,6 +409,7 @@ export class PromosService {
           ...result,
           firstName: clientName ? clientName.firstName : '',
           client: clientName ? clientName.firstName : '',
+          logo: clientName.logo,
         },
       };
     } catch (err) {
@@ -533,6 +540,21 @@ export class PromosService {
           },
         );
 
+        const checkUserInfluencer = await this.influencerModel.findOne({
+          _id: influencerId,
+        });
+        const checkUserClient = await this.clientModel.findOne({
+          _id: findNewPromo.userId,
+        });
+
+        await sendMail(
+          'admin@soundinfluencers.com',
+          'soundinfluencers',
+          `<p>${checkUserInfluencer.email} accept the offer for ${checkUserClient.email} campaign</p>
+            <p>Details:</p><br/><p>Id Promo: ${findNewPromo._id}</p><p>Client Name: ${checkUserClient.firstName}</p><p>Video Link: ${findNewPromo.videoLink}</p>`,
+          'html',
+        );
+
         return {
           code: 200,
           updateNewPromo,
@@ -565,7 +587,7 @@ export class PromosService {
         await sendMail(
           'admin@soundinfluencers.com',
           'soundinfluencers',
-          `<p>${checkUserInfluencer.firstName} declines the offer for ${checkUserClient.company} campaign</p>
+          `<p>${checkUserInfluencer.email} declines the offer for ${checkUserClient.email} campaign</p>
             <p>Details:</p><br/><p>Id Promo: ${findNewPromo._id}</p><p>Client Name: ${checkUserClient.firstName}</p><p>Video Link: ${findNewPromo.videoLink}</p>`,
           'html',
         );
@@ -614,12 +636,14 @@ export class PromosService {
           selectInfluencers: {
             $elemMatch: { influencerId: influencerId, confirmation: 'accept' },
           },
+          statusPromo: 'work',
         })
         .lean();
 
       const promosTotal = promos.map((item) => {
         const result = item.selectInfluencers.map((select) => {
           return {
+            promoId: item._id,
             ...item,
             ...select,
           };
@@ -709,9 +733,17 @@ export class PromosService {
 
       const promoCurrent = await this.promosModel.findOne({ _id: promoId });
 
+      const client = await this.clientModel.findOne({ _id: promo.userId });
+
       return {
         code: 200,
-        promo: currentDataInfluencer,
+        promo: {
+          ...currentDataInfluencer,
+          ...promo,
+          client: client.firstName,
+          logo: client.logo,
+        },
+        description: promoCurrent.postDescription,
         dateRequest: promoCurrent.dateRequest,
         date: promoCurrent.createdAt,
       };
@@ -771,6 +803,27 @@ export class PromosService {
           },
         },
       );
+
+      let checkPromo = true;
+      findNewPromo.selectInfluencers.forEach((item) => {
+        if (
+          item.postLink &&
+          item.datePost &&
+          item.impressions &&
+          item.like &&
+          item.screenshot
+        ) {
+        } else {
+          checkPromo = false;
+        }
+      });
+
+      if (checkPromo) {
+        await this.promosModel.findOneAndUpdate(
+          { _id: promoId },
+          { statusPromo: 'finally' },
+        );
+      }
 
       return {
         code: 200,

@@ -269,6 +269,7 @@ export class AuthService {
           (item, index) =>
             ` <p>(${index + 1}) Music Style: ${item.musicStyle}</p>
             <p>(${index + 1}) Instagram: ${item.instagramUsername}</p>
+            <p>(${index + 1}) Instagram Link: ${item.instagramLink}</p>
           <p>(${index + 1}) Followers Number: ${item.followersNumber}</p>,
           <p>(${index + 1}) Logo: ${item.logo}</p>,
           <p>(${index + 1}) Price: ${item.price}</p>`,
@@ -307,7 +308,7 @@ export class AuthService {
     }
   }
 
-  async verifyAdmin(verifyId: string, responseVerify: string) {
+  async verifyAdminInfluencer(verifyId: string, responseVerify: string) {
     if (!verifyId || !responseVerify) {
       return {
         status: 400,
